@@ -1,4 +1,4 @@
-**zero-shot human-object interaction detection**
+**This code is for zero-shot human-object interaction detection (ZSHOI)**
 # ZSHOI
 
 Discovering human interaction with novel objects via zero-shot learning, 2019.
@@ -15,7 +15,7 @@ What things you need to install the software and how to install them
 Give examples
 ```
 
-### Installing
+### Installation
 
 A step by step series of examples that tell you how to get a development env running
 
@@ -33,7 +33,7 @@ until finished
 
 End with an example of getting some data out of the system or using it for a little demo
 
-### Training a Model
+### Training a model and running inference
 
 #### 1. Human-Object Region Proposals Network (HORPN) only
 This example is provided for training the human-object region proposals network (i.e., not for the interactive object detection and interaction detection but only generating region proposals of human-interacting objects). The HORPN is used as the first stage of two-stage detectors (e.g., Faster R-CNN). Here we use Resnet-50-FPN as backbone. The model will be trained on the `VCOCO_train_seen` set which includes only the training images of seen objects. Please refer to the file `configs/horpn_only.yaml` for more configuration details. 
@@ -60,17 +60,13 @@ python tools/test_net.py \
 - Inference time should around 0.168s/image (on V100 GPU)
 - The evaluation results of generated proposals will be listed, e.g, AR@100, AR@500, Recall(IoU=0.5)@100, Recall(IoU=0.5)@500
 
-### And coding style tests
 
-Explain what these tests test and why
-
+## Citation
+If you use this code in your research or wish to refer to the baseline results published, please use the following BibTeX entry.
 ```
-Give an example
+Citation
 ```
 
-## Deployment
-
-Add additional notes about how to deploy this on a live system
 
 ## Contributing
 
