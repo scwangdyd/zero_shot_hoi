@@ -34,8 +34,6 @@ End with an example of getting some data out of the system or using it for a lit
 
 ## Training a Model
 
-Explain how to run the automated tests for this system
-
 ### Human-object Region Proposals Network (HORPN) only
 This example is provided for training only the human-object region proposals network (i.e., not for the interactive object detection and interaction detection). The HORPN is used as the first stage of two-stage detectors (e.g., Faster R-CNN) to generate region proposals of human-interacting objects. The model will be trained using the `VCOCO_train_seen` set which only includes the training images of seen objects. Please refer to the file `configs/horpn_only.yaml` for more configuration details. 
 
