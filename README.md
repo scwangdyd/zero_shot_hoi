@@ -33,9 +33,9 @@ until finished
 
 End with an example of getting some data out of the system or using it for a little demo
 
-### Training a model and running inference
+## Training a model and running inference
 
-#### 1. Human-Object Region Proposals Network (HORPN) only
+### 1. Human-Object Region Proposals Network (HORPN) only
 This example is provided for training the human-object region proposals network (i.e., not for the interactive object detection and interaction detection but only generating region proposals of human-interacting objects). The HORPN is used as the first stage of two-stage detectors (e.g., Faster R-CNN). Here we use Resnet-50-FPN as backbone. The model will be trained on the `VCOCO_train_seen` set which includes only the training images of seen objects. Please refer to the file `configs/horpn_only.yaml` for more configuration details. 
 
 ```
