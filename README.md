@@ -36,7 +36,7 @@ End with an example of getting some data out of the system or using it for a lit
 ## Training a model and running inference
 
 ### 1. Human-Object Region Proposals Network (HORPN) only
-This example is provided for training the human-object region proposals network (note: not for the interacting object detection or HOI detection). The HORPN is used as the first stage of two-stage detectors to generate region proposals for interacting objects. This example will train the model on the `vcoco_train_known` set which includes only the images and annotations of known objects. Please hard-code the path to images and annotation files in `lib/data/datasets/builtin.py` before runing the code.
+This example is provided for training the human-object region proposals network (note: not for the interacting object detection or HOI detection). The HORPN is used as the first stage of our full model to generate region proposals for interacting objects. This example will train the model on the `vcoco_train_known` set which includes only the images and annotations of known objects. *Please hard-code the path to images and annotation files in `lib/data/datasets/builtin.py` before runing the code.*
 
 ```
 # To train HORPN
@@ -44,10 +44,10 @@ python train_net.py --num-gpus 2 \
   --config-file configs/horpn_only.yaml OUTPUT_DIR ./output/horpn_only
 ```
 
-To run inference on `vcoco_val` which includes images of both known and novel objects. Using multiple GPUs can reduce the total inference time.
+To run inference on `vcoco_val` which includes both known and novel objects.
 
 ```
-# To run inference to evaluate HORPN
+# To run inference to evaluate HORPN. Using multiple GPUs can reduce the total inference time.
 python train_net.py --eval-only --num-gpus 2 \
   --config-file configs/horpn_only.yaml \
   MODEL.WEIGHTS ./output/horpn_only/model_final.pth \
@@ -56,7 +56,8 @@ python train_net.py --eval-only --num-gpus 2 \
 
 **Expected results**
 - Inference time should around 0.168s/image (on V100 GPU)
-- The evaluation results of generated proposals will be listed, e.g, AR@100, AR@500, Recall(IoU=0.5)@100, Recall(IoU=0.5)@500
+- The evaluation results of generated proposals will be listed, e.g, AR, Recall
+  \tiny
   | Expected results | Recall(IoU=0.5)@100 | Recall(IoU=0.5)@500 |
   | :--- | :---: | :---: |
   | Known objects | 92.34 | 96.53 |
