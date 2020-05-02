@@ -54,7 +54,6 @@ class StandardHORPNHead(nn.Module):
         conv_dim   = cfg.MODEL.HORPN.CONV_DIM
         num_rn_fc  = cfg.MODEL.HORPN.NUM_RN_FC
         rn_fc_dim  = cfg.MODEL.HORPN.RN_FC_DIM
-        norm       = cfg.MODEL.HORPN.NORM
         self.topk  = cfg.MODEL.HORPN.TOPK_PERSON_CELLS
         # fmt: on
 
