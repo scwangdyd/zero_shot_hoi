@@ -1,0 +1,15 @@
+_BASE_: "../Base-HOIRCNN-FPN.yaml"
+MODEL:
+  WEIGHTS: "./output/model_final_280758.pkl"
+  HOI_ON: False
+  ROI_HEADS:
+    SCORE_THRESH_TEST: 0.01
+SOLVER:
+  IMS_PER_BATCH: 4
+  BASE_LR: 0.005
+  STEPS: (40000, 80000)
+  MAX_ITER: 100000
+  CHECKPOINT_PERIOD: 1000
+DATASETS:
+  TRAIN: ("hico-det_train", )
+  TEST: ("hico-det_test", )

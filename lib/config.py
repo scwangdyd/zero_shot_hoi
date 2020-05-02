@@ -31,10 +31,10 @@ def add_hoircnn_default_config(cfg):
     cfg.MODEL.HORPN.IOU_LABELS = [0, -1, 1]
 
     # Total number of RPN examples per image
-    cfg.MODEL.HORPN.BATCH_SIZE_PER_IMAGE = 256
+    cfg.MODEL.HORPN.BATCH_SIZE_PER_IMAGE = 512
 
     # Target fraction of foreground (positive) examples per RPN minibatch
-    cfg.MODEL.HORPN.POSITIVE_FRACTION = 0.25
+    cfg.MODEL.HORPN.POSITIVE_FRACTION = 0.5
 
     # Weights on (dx, dy, dw, dh) for normalizing RPN anchor regression targets
     cfg.MODEL.HORPN.BBOX_REG_WEIGHTS = (1.0, 1.0, 1.0, 1.0)
@@ -104,9 +104,9 @@ def add_hoircnn_default_config(cfg):
     # N * M person-object pairs. `HOI_BATCH_SIZE_PER_IMAGE` = The number of pairs per image.
     # Total number of pairs per training minibatch =
     #   ROI_HEADS.HOI_BATCH_SIZE_PER_IMAGE * SOLVER.IMS_PER_BATCH
-    cfg.MODEL.ROI_HEADS.HOI_BATCH_SIZE_PER_IMAGE = 64
+    cfg.MODEL.ROI_HEADS.HOI_BATCH_SIZE_PER_IMAGE = 128
     # Target fraction of person-object pairs that is labeled foreground (i.e. interaction > 0)
-    cfg.MODEL.ROI_HEADS.HOI_POSITIVE_FRACTION = 0.5
+    cfg.MODEL.ROI_HEADS.HOI_POSITIVE_FRACTION = 1.0
     # Minimum score threshold (assuming scores in a [0, 1] range); a value chosen to
     # balance obtaining high recall with not having too many low precision detections
     # that will slow down inference post processing steps (like NMS)
