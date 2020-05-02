@@ -75,6 +75,15 @@ def add_hoircnn_default_config(cfg):
     cfg.MODEL.HORPN.RN_FC_DIM = 256
 
     # ---------------------------------------------------------------------------- #
+    # Additional ANCHOR_GENERATOR options
+    # ---------------------------------------------------------------------------- #
+    # One size for each in feature map.
+    # This is to match the HORPN in features ["p3", "p4", "p5", "p6"].
+    cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[64], [128], [256], [512]]
+    # Three aspect ratios (same for all in feature maps)
+    cfg.MODEL.ANCHOR_GENERATOR.ASPECT_RATIOS = [[0.5, 1.0, 2.0]]
+
+    # ---------------------------------------------------------------------------- #
     # Additional ROI HEADS options
     # ---------------------------------------------------------------------------- #
     # Number of action classes
