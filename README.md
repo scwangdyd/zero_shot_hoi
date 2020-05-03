@@ -15,7 +15,7 @@
 1. Please follow the [instructions](https://github.com/facebookresearch/detectron2/blob/master/INSTALL.md) to install detectron2 first.
 2. Install other dependencies by `pip install -r requirements.txt` or `conda install --file requirements.txt`
 3. Download and prepare the data by `sh prepare_data.sh`.
-    - It will download the [HICO-DET](http://www-personal.umich.edu/~ywchao/hico/) dataset and (V-COCO)[https://github.com/s-gupta/v-coco] dataset.
+    - It will download the [HICO-DET](http://www-personal.umich.edu/~ywchao/hico/) dataset and [V-COCO](https://github.com/s-gupta/v-coco) dataset.
     - If you already have, please comment out the corresponding lines in [prepare_data.sh](./prepare_data.sh) and **hard-code the dataset path using your custom path** in [lib/data/datasets/builtin.py](./lib/data/datasets/builtin.py).
 
 ## Training a model and running inference
@@ -72,6 +72,9 @@ python train_net.py --eval-only --num-gpus 2 \
     | Expected results | AP | AP50 | AP75 |
     | :--- | :---: | :---: | :---: |
     | Interacting objects |  |  |
+- Demo images\
+![alt-text-1](demo/demo_image1.png) ![alt-text-2](demo/demo_image2.png)
+
 
 ### 3. HOI Detection
 The following examples train a model to detect human-object interactions using `hico-det_train` set. Here we use all 80 MS-COCO object categories.
