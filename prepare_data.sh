@@ -1,7 +1,6 @@
 #!/bin/bash -e
 # Download some files needed for running our code.
 
-mkdir datasets
 # Download HICO-DET dataset. Comment out the following lines if you already have it.
 echo "Downlaoding HICO-DET dataset ..."
 gdown "https://drive.google.com/uc?id=1QZcJmGVlF9f4h-XLWe9Gkmnmj2z1gSnk" -O datasets/hico_det.tar.gz

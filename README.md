@@ -1,4 +1,4 @@
-**This code is our implementation for "Discovering Human Interactions with Novel Objects via Zero-Shot Learning", in CVPR, 2020.**
+**The implementation of "Discovering Human Interactions with Novel Objects via Zero-Shot Learning", in CVPR, 2020.**
 # ZSHOI
 
 ## Getting Started
@@ -7,14 +7,16 @@
 
 - Linux or macOS with Python ≥ 3.6
 - [PyTorch](https://pytorch.org) ≥ 1.4, torchvision that matches the PyTorch installation.
-- [detectron2](https://github.com/facebookresearch/detectron2).
+- [Detectron2](https://github.com/facebookresearch/detectron2)
 - Other packages listed in [reuirements.txt](./requirements.txt)
 
 ### Installation
 
-- Please follow the [instructions](https://github.com/facebookresearch/detectron2/blob/master/INSTALL.md) to install detectron2 first.
-- Install other dependencies `pip install -r requirements.txt` or `conda install --file requirements.txt`
-- Download and prepare the data `sh prepare_data.sh`. It will download the [HICO-DET](http://www-personal.umich.edu/~ywchao/hico/) dataset and (V-COCO)[https://github.com/s-gupta/v-coco] dataset. If you already have, please comment out the corresponding lines in [prepare_data.sh](./prepare_data.sh) and **hard-code the path to your dataset in [lib/data/datasets/builtin.py](./lib/data/datasets/builtin.py)**.
+1. Please follow the [instructions](https://github.com/facebookresearch/detectron2/blob/master/INSTALL.md) to install detectron2 first.
+2. Install other dependencies by `pip install -r requirements.txt` or `conda install --file requirements.txt`
+3. Download and prepare the data by `sh prepare_data.sh`.
+    - It will download the [HICO-DET](http://www-personal.umich.edu/~ywchao/hico/) dataset and (V-COCO)[https://github.com/s-gupta/v-coco] dataset.
+    - If you already have, please comment out the corresponding lines in [prepare_data.sh](./prepare_data.sh) and **hard-code the dataset path using your custom path** in [lib/data/datasets/builtin.py](./lib/data/datasets/builtin.py).
 
 ## Training a model and running inference
 
@@ -99,6 +101,7 @@ python train_net.py --eval-only --num-gpus 2 \
     | Default mAP |  |  | |
 
 ## Known/Novel Splits - 80 MS-COCO Objects
+To simulate the zero-shot cases, we split the 80 object categories into known and novel set based on their occurrence in HICO-DET and VCOCO datasets. The split can be found at [datasets/known_novel_split.py](./dataset/known_novel_split.py).
 
 ## Citing
 If you use this code in your research or wish to refer to the baseline results published, please use the following BibTeX entry.
