@@ -100,8 +100,8 @@ python train_net.py --eval-only --num-gpus 2 \
     | :--- | :---: | :---: | :---: |
     | Default mAP |  |  | |
 
-## Known/Novel Splits - 80 MS-COCO Objects
-To simulate the zero-shot cases, we split the 80 object categories into known and novel set based on their occurrence in HICO-DET and VCOCO datasets. The split can be found at [datasets/known_novel_split.py](./dataset/known_novel_split.py).
+## Known/Novel Split - 80 MS-COCO Objects
+To simulate the zero-shot cases, we split the 80 object categories into known and novel set based on their occurrence in HICO-DET and VCOCO datasets. The split can be found at [datasets/known_novel_split.py](./datasets/known_novel_split.py).
 
 ## Citing
 If you use this code in your research or wish to refer to the baseline results published, please use the following BibTeX entry.
