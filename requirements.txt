@@ -1,0 +1,11 @@
+pytorch>=1.4
+pyyaml>=3.12
+numpy>=1.13
+opencv-python>=3.2
+scipy
+Cython
+future
+protobuf
+packaging
+pycocotools
+gdown
