@@ -73,7 +73,7 @@ python train_net.py --eval-only --num-gpus 2 \
     | :--- | :---: | :---: | :---: |
     | Interacting objects |  |  |
 - Demo images\
-![alt-text-1](demo/demo_image1.png) ![alt-text-2](demo/demo_image2.png)
+<img src="demo/demo_image1.png" width="250"/> <img src="demo/demo_image2.png" width="280"/> 
 
 
 ### 3. HOI Detection
