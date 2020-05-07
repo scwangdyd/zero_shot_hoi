@@ -247,7 +247,7 @@ class HICOEvaluator(DatasetEvaluator):
             known_classes=self._metadata.get("known_classes"),
             novel_classes=self._metadata.get("novel_classes"),
         )
-        self._results[task] = res
+        self._results["bbox"] = res
 
     def _eval_interactions(self, predictions):
         """

@@ -1,7 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 import torch
 
-__all__ = ["subsample_labels", "subsample_labels_including_person_object"]
+__all__ = ["subsample_labels", "subsample_labels_with_must_include"]
 
 
 def subsample_labels(labels, num_samples, positive_fraction, bg_label):
@@ -50,15 +50,18 @@ def subsample_labels(labels, num_samples, positive_fraction, bg_label):
     return pos_idx, neg_idx
 
 
-def subsample_labels_including_person_object(
-    labels, is_person, num_samples, positive_fraction, bg_label, person_cls_id=0
+def subsample_labels_with_must_include(
+    labels, num_samples, positive_fraction, bg_label, must_include_mask=None, num_must_include=None
 ):
     """
     Return `num_samples` (or fewer, if not enough found)
-    random samples from `labels` which is a mixture of positives & negatives including
-    both person and object instances. It will try to return as many positives as possible
-    without exceeding `positive_fraction * num_samples`, and then try to fill the remaining
+    random samples from `labels` which is a mixture of positives & negatives.
+    It will try to return as many positives as possible without exceeding
+    `positive_fraction * num_samples`, and then try to fill the remaining
     slots with negatives.
+    If "must_include_mask" and "num_must_include" is not None, it will include instances
+    as indicated by "must_include_mask" and at "num_must_include" instances.
+    
 
     Args:
         labels (Tensor): (N, ) label vector with values:
@@ -75,6 +78,10 @@ def subsample_labels_including_person_object(
             negatives. If there are also not enough negatives, then as many elements are
             sampled as is possible.
         bg_label (int): label index of background ("negative") class.
+        must_include_mask (Tensor): (M, ) mask vector of must included instances with values:
+            * 1: must include
+            * 0: no need
+        num_must_include (int): The total number of must included instances
 
     Returns:
         pos_idx, neg_idx (Tensor):
@@ -90,8 +97,14 @@ def subsample_labels_including_person_object(
     # protect against not enough negative examples
     num_neg = min(negative.numel(), num_neg)
 
-    num_person, num_object = 0, 0
-    while not (num_person > 0 and num_object > 0):
+    # protect against not enough examples
+    positive_must_include = torch.nonzero(
+        (labels != -1) & (labels != bg_label) & (must_include_mask == 1)
+    ).squeeze(1)
+    num_must_include = min(num_must_include, positive_must_include.numel())
+    
+    num_include = 0
+    while num_include < num_must_include:
         # randomly select positive and negative examples
         perm1 = torch.randperm(positive.numel(), device=positive.device)[:num_pos]
         perm2 = torch.randperm(negative.numel(), device=negative.device)[:num_neg]
@@ -99,8 +112,8 @@ def subsample_labels_including_person_object(
         pos_idx = positive[perm1]
         neg_idx = negative[perm2]
 
-        num_person = (labels[pos_idx] == person_cls_id).nonzero().numel()
-        num_person = min(num_person, (is_person[pos_idx] == 1).nonzero().numel())
-        num_object = ((labels[pos_idx] > 0) & (labels[pos_idx] != bg_label)).nonzero().numel()
-
+        tmp = torch.zeros_like(must_include_mask)
+        tmp[pos_idx] = 1.
+        num_include = torch.nonzero((tmp == 1) & (must_include_mask == 1)).numel()
+        
     return pos_idx, neg_idx

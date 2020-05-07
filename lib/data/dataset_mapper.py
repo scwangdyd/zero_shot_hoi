@@ -9,7 +9,7 @@ from detectron2.data import detection_utils as utils
 from detectron2.data import transforms as T
 from detectron2.structures import Boxes, BoxMode, Instances
 
-from lib.interactions import Interactions
+from lib.utils.interactions import Interactions
 
 """
 This file contains the default mapping that's applied to "dataset dicts".

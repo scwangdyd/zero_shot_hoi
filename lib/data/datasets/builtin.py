@@ -83,11 +83,11 @@ _PREDEFINED_SPLITS_HICO = {}
 _PREDEFINED_SPLITS_HICO["hico-det"] = {
     "hico-det_train": (
         "hico_20160224_det/images/train2015",
-        "hico_20160224_det/annotations/instances_hico_train_hoi_github.json",
+        "hico_20160224_det/annotations/instances_hico_train_hoi_github_may1.json",
     ),
     "hico-det_test": (
         "hico_20160224_det/images/test2015",
-        "hico_20160224_det/annotations/instances_hico_test_hoi_github_03.json",
+        "hico_20160224_det/annotations/instances_hico_test_hoi_github_may1.json",
     ),
     "hico-det_train_seen": (
         "hico_20160224_det/images/train2015",

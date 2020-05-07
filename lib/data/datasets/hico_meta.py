@@ -199,7 +199,7 @@ HICO_ACTIONS = [
     {'id': 99, 'name': 'swing', 'prior': 0.00418},
     {'id': 100, 'name': 'tag', 'prior': 1e-05},
     {'id': 101, 'name': 'talk_on', 'prior': 0.00232},
-    {'id': 102, 'name': 'teach', 'prior': 1e-05},
+    {'id': 102, 'name': 'teach', 'prior': 0.001},
     {'id': 103, 'name': 'text_on', 'prior': 0.00129},
     {'id': 104, 'name': 'throw', 'prior': 0.00378},
     {'id': 105, 'name': 'tie', 'prior': 0.00071},

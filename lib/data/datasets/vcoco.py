@@ -151,19 +151,31 @@ Category ids in annotations are not in [1, #categories]! We'll apply a mapping f
 
             obj = {key: anno[key] for key in ann_keys if key in anno}
 
-            # HOI annotations in the annotation files
+            # "hoi_triplets" in the annotation is a list[dict], where each dict is an
+            # annotation record for an interaction. Example of anno["hoi_triplet"][0]:
+            # [{
+            #       person_id: 42984,
+            #       object_id: 42986,
+            #       action_id: 4
+            #   },
+            # ... ]
+            # Here "person_id" ("object_id") is the *anno id* of the person (object) instance.
+            # For each instance, we record its interactions with other instances in the given
+            # image in an binary matrix named `actions` with shape (N, K), where N is the number
+            # of instances and K is the number of actions. If this instance is interacting with
+            # j-th instance with k-th action, then (i, j) entry of `actions` will be 1.
             actions = np.zeros((num_instances, len(action_classes)))
-            hoi_triplets = anno.get("hoi_triplets", None)
-            if hoi_triplets:
-                if len(hoi_triplets) == 0:
-                    num_instances_without_hoi_annotations += 1
-
-                unmap_triplets_within_image(hoi_triplets, anno_dict_list)
+            hoi_triplets = anno["hoi_triplets"]
+            if len(hoi_triplets) > 0:
+                # Mapping *anno id* of instances to contiguous indices in this image
+                map_to_contiguous_id_within_image(hoi_triplets, anno_dict_list)
                 for triplet in hoi_triplets:
                     action_id = triplet["action_id"]
-                    target_id = triplet["object_id"] if anno["category_id"] == person_cls_id else \
-                                triplet["person_id"]
+                    is_person = (anno["category_id"] == person_cls_id)
+                    target_id = triplet["object_id"] if is_person else triplet["person_id"]
                     actions[target_id, action_id] = 1
+            else:
+                num_instances_without_hoi_annotations += 1
 
             obj["actions"] = actions
             obj["isactive"] = 1 if len(hoi_triplets) > 0 else 0
@@ -187,25 +199,25 @@ Category ids in annotations are not in [1, #categories]! We'll apply a mapping f
     return dataset_dicts
 
 
-def unmap_triplets_within_image(hoi_triplets, anno_dict_list):
+def map_to_contiguous_id_within_image(hoi_triplets, anno_dict_list):
     """
-    Unmap annotation index in HOI triplets to contiguous index per image, (i.e.,
-    {"person_id": 2001, "object_id": 2003, "action_id": 1} ->
-    {"person_id": 0, "object_id": 2, "action_id": 1})
+    Map annotation id in HOI triplets to contiguous index within the given image.
+    For example, map {"person_id": 2001, "object_id": 2003, "action_id": 1} to
+                     {"person_id": 0,    "object_id": 2,    "action_id": 1}) if
+    the annotation ids in this image start from 2001.
 
     Args:
-        hoi_triplets (list[dict]): full HOI instances annotation per image.
-        anno_dict_list (list[dict]): full COCO instances annotation per image.
+        hoi_triplets (list[dict]): HOI annotations of an instance.
+        anno_dict_list (list[dict]): annotations of all instances in the image.
 
     Returns:
-        list[dict]: a list of dicts (HOI triplets).
+        list[dict]: HOI annotations with contiguous id within the image.
     """
-    anno_id_remap = {ann['id']: ix for ix, ann in enumerate(anno_dict_list)}
-    # The original VCOOC dataset contains `person alone` annotations, (e.g.,
-    # walking, etc.) without interacting objects. The object index in this case
-    # is denoted as -1.
-    anno_id_remap.update({-1: -1})
+    anno_id_to_contiguous_id = {ann['id']: ix for ix, ann in enumerate(anno_dict_list)}
+    # This fails when annotation file is buggy. The dataset may contain person alone interactions,
+    # (e.g., without interacting objects). The object index in this case is denoted as -1.
+    anno_id_to_contiguous_id.update({-1: -1})
 
     for triplet in hoi_triplets:
-        triplet['person_id'] = anno_id_remap[triplet['person_id']]
-        triplet['object_id'] = anno_id_remap[triplet['object_id']]
+        triplet['person_id'] = anno_id_to_contiguous_id[triplet['person_id']]
+        triplet['object_id'] = anno_id_to_contiguous_id[triplet['object_id']]

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .hico_meta import HICO_OBJECTS, HICO_ACTIONS, HICO_INTERACTIONS
-
+from .vcoco_meta import VCOCO_OBJECTS, VCOCO_ACTIONS
 
 def _get_coco_instances_meta():
     """
@@ -24,17 +24,28 @@ def _get_vcoco_instances_meta():
     """
     Returns metadata for VCOCO dataset.
     """
-    thing_ids = [k["id"] for k in HICO_OBJECTS if k["isthing"] == 1]
-    thing_colors = [k["color"] for k in HICO_OBJECTS if k["isthing"] == 1]
+    thing_ids = [k["id"] for k in VCOCO_OBJECTS if k["isthing"] == 1]
+    thing_colors = [k["color"] for k in VCOCO_OBJECTS if k["isthing"] == 1]
     assert len(thing_ids) == 80, len(thing_ids)
     # Mapping from the incontiguous COCO category id to an id in [0, 79]
     thing_dataset_id_to_contiguous_id = {k: i for i, k in enumerate(thing_ids)}
-    thing_classes = [k["name"] for k in HICO_OBJECTS if k["isthing"] == 1]
+    thing_classes = [k["name"] for k in VCOCO_OBJECTS if k["isthing"] == 1]
+    # Splitting object categories using our known/novel splits. Here all objects are known.
+    known_classes = [k["name"] for k in VCOCO_OBJECTS if k["isthing"] == 1]
+    novel_classes = []
+    # Category id of `person`
+    person_cls_id = [k["id"] for k in VCOCO_OBJECTS if k["name"] == 'person'][0]
+    # VCOCO actions
+    action_classes = [k["name"] for k in VCOCO_ACTIONS]
 
     ret = {
         "thing_dataset_id_to_contiguous_id": thing_dataset_id_to_contiguous_id,
-        "thing_classes": thing_classes,
-        "thing_colors": thing_colors,
+        "thing_classes":  thing_classes,
+        "thing_colors":   thing_colors,
+        "known_classes":  known_classes,
+        "novel_classes":  novel_classes,
+        "person_cls_id":  person_cls_id,
+        "action_classes": action_classes,
     }
     return ret
 
@@ -44,7 +55,7 @@ def _get_hico_instances_meta():
     Returns metadata for HICO-DET dataset.
     """
     thing_ids = [k["id"] for k in HICO_OBJECTS if k["isthing"] == 1]
-    thing_colors = [k["color"] for k in HICO_OBJECTS if k["isthing"] == 1]
+    thing_colors = {k["name"]: k["color"] for k in HICO_OBJECTS if k["isthing"] == 1}
     assert len(thing_ids) == 80, len(thing_ids)
     # Mapping from the incontiguous category id to an id in [0, 79]
     thing_dataset_id_to_contiguous_id = {k: i for i, k in enumerate(thing_ids)}

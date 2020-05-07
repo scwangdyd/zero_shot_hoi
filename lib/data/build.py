@@ -81,8 +81,9 @@ def filter_images_without_any_hois(dataset_dicts):
 
     def valid(anns):
         for ann in anns:
-            # Check if interactive objects exist
-            if np.sum(ann['actions']) > 0 and ann['category_id'] > 0:
+            # Check if interactive objects exist. Allow person to person interaction.
+            # if np.sum(ann["actions"]) > 0 and ann["category_id"] > 0:
+            if np.sum(ann["actions"]) > 0:
                 return True
         return False
 
