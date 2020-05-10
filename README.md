@@ -24,7 +24,7 @@ To update.
     - COCO's format annotations for HICO-DET and VCOCO dataset.
     - [Glove](https://nlp.stanford.edu/projects/glove/) semantic embeddings.
 
-### Demo Inference with Pre-trained Model
+## Demo Inference with Pre-trained Model
 
 1. Download our pre-trained model on HICO-DET dataset or V-COCO dataset. *Note: HICO-DET dataset allows 116 (excluding "no_interaction") actions and V-COCO allows 25 actions*.
 
@@ -42,9 +42,9 @@ To update.
       --input ./demo/HICO_test2015_00003124.jpg \
       --opts MODEL.WEIGHTS ./output/hico_det_pretrained.pkl
     ```
-- If to run demo for images in 'directory/*.jpg', replace `--input input1.jpg input2.jpg` with `--input directory/*.jpg`.
-- If to run demo on a video, please replace `--input input1.jpg input2.jpg` with `--video-input video.mp4`.
-- To save outputs to a directory (for images) or a file (for webcam or video), use `--output`, by default `../output/`
+    - If to run demo for images in `directory/*.jpg`, replace `--input input1.jpg input2.jpg` with `--input directory/*.jpg`.
+    - If to run demo on a video, please replace `--input input1.jpg input2.jpg` with `--video-input video.mp4`.
+    - To save outputs to a directory (for images) or a file (for webcam or video), use `--output`, by default `./output/`
 
 3. Run demo to discover human interactions with novel (zero-shot) objects. Please incidate the interested novel objects (categories out of 80 MS-COCO objects) via command line arguments.
     ```
@@ -62,7 +62,8 @@ This example is provided for training the human-object region proposals network 
 ```
 # To train HORPN
 python train_net.py --num-gpus 2 \
-  --config-file configs/horpn_only.yaml OUTPUT_DIR ./output/horpn_only
+  --config-file configs/horpn_only.yaml \
+  OUTPUT_DIR ./output/horpn_only
 ```
 
 To run inference on `vcoco_val` which includes both known and novel objects.
@@ -137,21 +138,24 @@ python train_net.py --eval-only --num-gpus 2 \
     | :--- | :---: | :---: | :---: |
     | Default mAP | 20.096 | 14.969 | 21.628 |
     | Default mAP (excluding "no_interaction") | 23.188 | 15.650 | 25.753 |
+
   *Note: This result is better than the result reported in our paper due to some code optimization.*
 
 ### 3. Zero-Shot HOI Detection
-The following examples train a model to detect zero-shot human-object interactions using `hico-det_train` set. The only difference from the above is to use a class agnostic bbox regressor.
+The following examples train a model to detect human interactions with novel objects using `hico-det_train` set. The only difference from the above is to use a class agnostic bbox regressor here.
 
 ```
 # Interacting object detection
 python train_net.py --num-gpus 2 \
-  --config-file configs/HICO-DET/interaction_zero_shot_R_50_FPN.yaml OUTPUT_DIR ./output/HICO_interaction_zero_shot
+  --config-file configs/HICO-DET/interaction_zero_shot_R_50_FPN.yaml \
+  OUTPUT_DIR ./output/HICO_interaction_zero_shot
 ```
 
 To run inference, you can specify the interested novel object categories by `--novel-object object1 object2 object3`.
 
 ```
-  python demo.py --config-file ./configs/HICO-DET/interaction_zero_shot_R_50_FPN.yaml \
+  python demo.py \
+    --config-file ./configs/HICO-DET/interaction_zero_shot_R_50_FPN.yaml \
     --novel-object microphone paddle \
     --input ./demo/HICO_test2015_00003124.jpg \
     --opts MODEL.WEIGHTS ./output/hico_det_pretrained.pkl
