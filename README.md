@@ -1,7 +1,11 @@
 **The implementation of "Discovering Human Interactions with Novel Objects via Zero-Shot Learning", in CVPR, 2020.**
 # ZSHOI
+To update.
+
+<img src="demo/HICO_test2015_00003124_demo.jpg" width="400"/>
 
 ## Getting Started
+
 
 ### Prerequisites
 
@@ -15,8 +19,40 @@
 1. Please follow the [instructions](https://github.com/facebookresearch/detectron2/blob/master/INSTALL.md) to install detectron2 first.
 2. Install other dependencies by `pip install -r requirements.txt` or `conda install --file requirements.txt`
 3. Download and prepare the data by `sh prepare_data.sh`.
-    - It will download the [HICO-DET](http://www-personal.umich.edu/~ywchao/hico/) dataset and [V-COCO](https://github.com/s-gupta/v-coco) dataset.
-    - If you already have, please comment out the corresponding lines in [prepare_data.sh](./prepare_data.sh) and **hard-code the dataset path using your custom path** in [lib/data/datasets/builtin.py](./lib/data/datasets/builtin.py).
+    - The [HICO-DET](http://www-personal.umich.edu/~ywchao/hico/) dataset and [V-COCO](https://github.com/s-gupta/v-coco) dataset.
+      - If you already have, please comment out the corresponding lines in [prepare_data.sh](./prepare_data.sh) and **hard-code the dataset path using your custom path** in [lib/data/datasets/builtin.py](./lib/data/datasets/builtin.py).
+    - COCO's format annotations for HICO-DET and VCOCO dataset.
+    - [Glove](https://nlp.stanford.edu/projects/glove/) semantic embeddings.
+
+### Demo Inference with Pre-trained Model
+
+1. Download our pre-trained model on [HICO-DET dataset]() or V-COCO dataset. *Note: HICO-DET dataset allows 116 (excluding "no_interaction") actions, while V-COCO allows 25 actions*.
+
+    ```
+    cd demo
+    # Download pre-trained model on HICO-DET dataset
+    sh download_pretrained_hicodet.sh
+    # Or download pre-trained model on V-COCO dataset
+    sh download_pretrained_vcoco.sh
+    ```
+
+2. Run demo with pre-trained model (for example, pretrained model on HICO-DET)
+    ```
+    python demo.py --config-file ./configs/HICO-DET/interaction_R_50_FPN.yaml \
+      --input ./demo/HICO_test2015_00003124.jpg \
+      --opts MODEL.WEIGHTS ./output/hico_det_pretrained.pkl
+    ```
+- If to run demo for images in 'directory/*.jpg', replace `--input input1.jpg input2.jpg` with `--input directory/*.jpg`.
+- If to run demo on a video, please replace `--input input1.jpg input2.jpg` with `--video-input video.mp4`.
+- To save outputs to a directory (for images) or a file (for webcam or video), use `--output`, by default `../output/`
+
+3. Run demo to discover human interactions with novel (zero-shot) objects. Please incidate the interested novel objects (categories out of 80 MS-COCO objects) via command line arguments.
+    ```
+    python demo.py --config-file ./configs/HICO-DET/interaction_zero_shot_R_50_FPN.yaml \
+      --novel-object microphone paddle \
+      --input ./demo/HICO_test2015_00003124.jpg \
+      --opts MODEL.WEIGHTS ./output/hico_det_pretrained.pkl
+    ```
 
 ## Training a model and running inference
 
@@ -67,13 +103,11 @@ python train_net.py --eval-only --num-gpus 2 \
 ```
 
 **Expected results**
-- Inference time should around 0.098s/image (on V100 GPU)
+- Inference time should around 0.074s/image (on V100 GPU)
 - The results of COCO's metrics will be listed, e.g, per-class Average Precision (AP)
     | Expected results | AP | AP50 | AP75 |
     | :--- | :---: | :---: | :---: |
-    | Interacting objects |  |  |
-- Demo images\
-<img src="demo/demo_image1.png" width="250"/> <img src="demo/demo_image2.png" width="280"/> 
+    | Interacting objects | 25.623 | 44.765 | 25.768 |
 
 
 ### 3. HOI Detection
@@ -101,7 +135,25 @@ python train_net.py --eval-only --num-gpus 2 \
 - The results of HICO-DET's metrics will be listed, e.g,
     | Expected results |  full   |   rare   |  non-rare |
     | :--- | :---: | :---: | :---: |
-    | Default mAP |  |  | |
+    | Default mAP | 23.013 | 15.630 | 25.525 |
+
+### 3. Zero-Shot HOI Detection
+The following examples train a model to detect zero-shot human-object interactions using `hico-det_train` set. The only difference from the above is to use class agnostic bbox regressor.
+
+```
+# Interacting object detection
+python train_net.py --num-gpus 2 \
+  --config-file configs/HICO-DET/interaction_zero_shot_R_50_FPN.yaml OUTPUT_DIR ./output/HICO_interaction_zero_shot
+```
+
+To run inference, you can specify the interested novel object categories by `--novel-object object1 object2 object3`.
+
+```
+  python demo.py --config-file ./configs/HICO-DET/interaction_zero_shot_R_50_FPN.yaml \
+    --novel-object microphone paddle \
+    --input ./demo/HICO_test2015_00003124.jpg \
+    --opts MODEL.WEIGHTS ./output/hico_det_pretrained.pkl
+```
 
 ## Known/Novel Split - 80 MS-COCO Objects
 To simulate the zero-shot cases, we split the 80 object categories into known and novel set based on their occurrence in HICO-DET and VCOCO datasets. The split can be found at [datasets/known_novel_split.py](./datasets/known_novel_split.py).
@@ -121,9 +173,3 @@ year = {2020}
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
