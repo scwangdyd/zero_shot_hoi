@@ -15,8 +15,8 @@ from detectron2.modeling.matcher import Matcher
 from detectron2.modeling.roi_heads import ROIHeads, ROI_HEADS_REGISTRY
 from detectron2.utils.logger import setup_logger
 
-from lib.interactions import Interactions
-from .sampling import subsample_labels, subsample_labels_including_person_object
+from lib.utils.interactions import Interactions
+from .sampling import subsample_labels, subsample_labels_with_must_include
 from .fast_rcnn import BoxOutputLayers, HoiOutputLayers
 from .box_head import build_box_head, build_hoi_head
 
@@ -88,11 +88,13 @@ class StandardHOROIHeads(nn.Module):
         if not self.hoi_on:
             return
         # fmt: off
-        pooler_resolution = cfg.MODEL.HOI_BOX_HEAD.POOLER_RESOLUTION
-        pooler_scales     = tuple(1.0 / input_shape[k].stride for k in self.in_features)
-        sampling_ratio    = cfg.MODEL.HOI_BOX_HEAD.POOLER_SAMPLING_RATIO
-        pooler_type       = cfg.MODEL.HOI_BOX_HEAD.POOLER_TYPE
+        pooler_resolution      = cfg.MODEL.HOI_BOX_HEAD.POOLER_RESOLUTION
+        pooler_scales          = tuple(1.0 / input_shape[k].stride for k in self.in_features)
+        sampling_ratio         = cfg.MODEL.HOI_BOX_HEAD.POOLER_SAMPLING_RATIO
+        pooler_type            = cfg.MODEL.HOI_BOX_HEAD.POOLER_TYPE
+        allow_person_to_person = cfg.MODEL.HOI_BOX_HEAD.ALLOW_PERSON_TO_PERSON
         # fmt: on
+        self.allow_person_to_person = allow_person_to_person
 
         # If StandardHOROIHeads is applied on multiple feature maps (as in FPN),
         # then we share the same predictors and therefore the channel counts must be the same
@@ -373,7 +375,7 @@ class StandardHOROIHeads(nn.Module):
         matched_idxs: torch.Tensor,
         matched_labels: torch.Tensor,
         gt_classes: torch.Tensor,
-        is_person: torch.Tensor
+        must_include_mask: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Based on the matching between N proposals and M groundtruth,
@@ -385,7 +387,9 @@ class StandardHOROIHeads(nn.Module):
             matched_labels (Tensor): a vector of length N, the matcher's label
                 (one of cfg.MODEL.ROI_HEADS.IOU_LABELS) for each proposal.
             gt_classes (Tensor): a vector of length M.
-            is_person (Tensor): proposal tags to indicate if it is from person branch in HORPN.
+            must_include_mask (Tensor): a mask with values:
+                * 1: the proposal is from person branch in HORPN.
+                * 0: the proposal is from object branch in HORPN.
 
         Returns:
             Tensor: a vector of indices of sampled proposals. Each is in [0, N).
@@ -404,16 +408,17 @@ class StandardHOROIHeads(nn.Module):
         else:
             gt_classes = torch.zeros_like(matched_idxs) + self.num_classes
 
-        # The original `subsample_labels` used in detectron2 does not ensure to
-        # sample both person and object instances, causing the subsequent HOI head
-        # has no valid person-object pairs. Here we have to avoid this case.
-        sampled_fg_idxs, sampled_bg_idxs = subsample_labels_including_person_object(
+        # Because there are many more objects than person in generated proposals
+        # (ratio_object = 0.95), the original `subsample_labels` used in Detectron2 may miss pesron
+        # instances, causing empty bugs in the subsequent HOI head since it cannot find valid
+        # person-object pairs. Here we have to avoid this case.
+        sampled_fg_idxs, sampled_bg_idxs = subsample_labels_with_must_include(
             gt_classes,
-            is_person,
             self.box_batch_size_per_image,
             self.box_positive_sample_fraction,
             self.num_classes,
-            person_cls_id=0
+            must_include_mask=must_include_mask,
+            num_must_include=1
         )
 
         sampled_idxs = torch.cat([sampled_fg_idxs, sampled_bg_idxs], dim=0)
@@ -453,7 +458,7 @@ class StandardHOROIHeads(nn.Module):
         for instances_per_image in instances:
             if self.training:
                 # Proposals generated from person branch in HORPN will be seen as person boxes;
-                # Proposals generated from object branch in HORPN will be object boxes
+                # Proposals generated from object branch in HORPN will be object boxes.
                 boxes = instances_per_image.proposal_boxes
                 person_idxs = (instances_per_image.is_person == 1).nonzero().squeeze(1)
                 object_idxs = (instances_per_image.is_person == 0).nonzero().squeeze(1)
@@ -462,13 +467,22 @@ class StandardHOROIHeads(nn.Module):
                 boxes = instances_per_image.pred_boxes
                 person_idxs = torch.nonzero(instances_per_image.pred_classes == 0).squeeze(1)
                 object_idxs = torch.nonzero(instances_per_image.pred_classes >  0).squeeze(1)
+            
+            if self.allow_person_to_person:
+                # Allow person to person interactions. Then all boxes will be used.
+                object_idxs = torch.arange(len(instances_per_image), device=object_idxs.device)
 
             num_pboxes, num_oboxes = person_idxs.numel(), object_idxs.numel()
 
             union_boxes = _pairwise_union_regions(boxes[person_idxs], boxes[object_idxs])
-            # Indexing person/object boxes in a matched order
+            # Indexing person/object boxes in a matched order.
             person_idxs = person_idxs[:, None].repeat(1, num_oboxes).flatten()
             object_idxs = object_idxs[None, :].repeat(num_pboxes, 1).flatten()
+            # Remove self-to-self interaction.
+            keep = (person_idxs != object_idxs).nonzero().squeeze(1)
+            union_boxes = union_boxes[keep]
+            person_idxs = person_idxs[keep]
+            object_idxs = object_idxs[keep]
 
             hopairs_per_image = Instances(instances_per_image.image_size)
             hopairs_per_image.union_boxes = union_boxes

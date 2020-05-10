@@ -410,32 +410,27 @@ class HORPNOutputs(object):
                 if gt_isactive_i[j] > 0 and gt_classes_i[j] > 0
             ]
 
-            gt_person_boxes_i = Boxes.cat(gt_person_boxes_i)
-            gt_object_boxes_i = Boxes.cat(gt_object_boxes_i)
+            num_person_gts, num_object_gts = len(gt_person_boxes_i), len(gt_object_boxes_i)
 
-            person_match_quality = retry_if_cuda_oom(pairwise_iou)(gt_person_boxes_i, anchors_i)
-            object_match_quality = retry_if_cuda_oom(pairwise_iou)(gt_object_boxes_i, anchors_i)
-
-            matched_person_idxs, gt_person_logits_i = retry_if_cuda_oom(self.anchor_matcher)(person_match_quality)
-            matched_object_idxs, gt_object_logits_i = retry_if_cuda_oom(self.anchor_matcher)(object_match_quality)
-
-            # Matching is memory-expensive and may result in CPU tensors. But the result is small
-            gt_person_logits_i = gt_person_logits_i.to(device=gt_boxes_i.device)
-            gt_object_logits_i = gt_object_logits_i.to(device=gt_boxes_i.device)
-            del person_match_quality
-            del object_match_quality
-
-            if self.boundary_threshold >= 0:
-                # Discard anchors that go out of the boundaries of the image
-                # NOTE: This is legacy functionality that is turned off by default in Detectron2
-                anchors_inside_image = anchors_i.inside_box(image_size_i, self.boundary_threshold)
-                gt_person_logits_i[~anchors_inside_image] = -1
-                gt_object_logits_i[~anchors_inside_image] = -1
-
-            if len(gt_person_boxes_i) == 0:
+            if num_person_gts == 0:
                 # These values won't be used anyway since the anchor is labeled as background
                 gt_person_deltas_i = torch.zeros_like(anchors_i.tensor)
+                gt_person_logits_i = torch.zeros(
+                    (len(anchors_i.tensor),), dtype=torch.int8, device=gt_boxes_i.device
+                )
             else:
+                gt_person_boxes_i = Boxes.cat(gt_person_boxes_i)
+                person_match_quality = retry_if_cuda_oom(pairwise_iou)(gt_person_boxes_i, anchors_i)
+                matched_person_idxs, gt_person_logits_i = retry_if_cuda_oom(self.anchor_matcher)(person_match_quality)
+                # Matching is memory-expensive and may result in CPU tensors. But the result is small
+                gt_person_logits_i = gt_person_logits_i.to(device=gt_boxes_i.device)
+                del person_match_quality
+
+                if self.boundary_threshold >= 0:
+                    # Discard anchors that go out of the boundaries of the image
+                    anchors_inside_image = anchors_i.inside_box(image_size_i, self.boundary_threshold)
+                    gt_person_logits_i[~anchors_inside_image] = -1
+
                 matched_gt_person_boxes = gt_person_boxes_i[matched_person_idxs]
                 gt_person_deltas_i = self.box2box_transform.get_deltas(
                     anchors_i.tensor, matched_gt_person_boxes.tensor
@@ -444,10 +439,26 @@ class HORPNOutputs(object):
             gt_person_logits.append(gt_person_logits_i)
             gt_person_deltas.append(gt_person_deltas_i)
 
-            if len(gt_object_boxes_i) == 0:
+
+            if num_object_gts == 0:
                 # These values won't be used anyway since the anchor is labeled as background
                 gt_object_deltas_i = torch.zeros_like(anchors_i.tensor)
+                gt_object_logits_i = torch.zeros(
+                    (len(anchors_i.tensor),), dtype=torch.int8, device=gt_boxes_i.device
+                )
             else:
+                gt_object_boxes_i = Boxes.cat(gt_object_boxes_i)
+                object_match_quality = retry_if_cuda_oom(pairwise_iou)(gt_object_boxes_i, anchors_i)
+                matched_object_idxs, gt_object_logits_i = retry_if_cuda_oom(self.anchor_matcher)(object_match_quality)
+                # Matching is memory-expensive and may result in CPU tensors. But the result is small
+                gt_object_logits_i = gt_object_logits_i.to(device=gt_boxes_i.device)
+                del object_match_quality
+                
+                if self.boundary_threshold >= 0:
+                    # Discard anchors that go out of the boundaries of the image
+                    anchors_inside_image = anchors_i.inside_box(image_size_i, self.boundary_threshold)
+                    t_object_logits_i[~anchors_inside_image] = -1
+                
                 matched_gt_object_boxes = gt_object_boxes_i[matched_object_idxs]
                 gt_object_deltas_i = self.box2box_transform.get_deltas(
                     anchors_i.tensor, matched_gt_object_boxes.tensor
