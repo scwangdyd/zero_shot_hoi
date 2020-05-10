@@ -190,19 +190,24 @@ class HOIRCNN(nn.Module):
         """
         # note: private function; subject to changes;
         processed_results = []
-        for box_results_per_image, hoi_results_per_image, input_per_image, image_size in zip(
-            instances[0], instances[1], batched_inputs, image_sizes
+        for box_results_per_image, input_per_image, image_size in zip(
+            instances[0], batched_inputs, image_sizes
         ):
             height = input_per_image.get("height", image_size[0])
             width = input_per_image.get("width", image_size[1])
-
             box_results_per_image = detector_postprocess(box_results_per_image, height, width)
-            hoi_results_per_image = detector_postprocess(hoi_results_per_image, height, width)
-            processed_results.append({
-                "box_instances": box_results_per_image,
-                "hoi_instances": hoi_results_per_image,
-            })
-    
+            processed_results.append({"box_instances": box_results_per_image})
+        
+        num_hoi_instances = len(instances[1])
+        if num_hoi_instances > 0:
+            for ix, hoi_results_per_image, input_per_image, image_size in zip(
+                range(len(batched_inputs)), instances[1], batched_inputs, image_sizes
+            ):
+                height = input_per_image.get("height", image_size[0])
+                width = input_per_image.get("width", image_size[1])
+                hoi_results_per_image = detector_postprocess(hoi_results_per_image, height, width)
+                processed_results[ix].update({"hoi_instances": hoi_results_per_image})
+
         return processed_results
 
 
