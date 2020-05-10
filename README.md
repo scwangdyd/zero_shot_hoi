@@ -2,7 +2,7 @@
 # ZSHOI
 To update.
 
-<img src="demo/HICO_test2015_00003124_demo.jpg" width="400"/>
+<img src="demo/HICO_test2015_00003124_demo.jpg" width="500"/>
 
 ## Getting Started
 
@@ -18,7 +18,7 @@ To update.
 
 1. Please follow the [instructions](https://github.com/facebookresearch/detectron2/blob/master/INSTALL.md) to install detectron2 first.
 2. Install other dependencies by `pip install -r requirements.txt` or `conda install --file requirements.txt`
-3. Download and prepare the data by `sh prepare_data.sh`.
+3. Download and prepare the data by `cd datasets; sh prepare_data.sh`.
     - The [HICO-DET](http://www-personal.umich.edu/~ywchao/hico/) dataset and [V-COCO](https://github.com/s-gupta/v-coco) dataset.
       - If you already have, please comment out the corresponding lines in [prepare_data.sh](./prepare_data.sh) and **hard-code the dataset path using your custom path** in [lib/data/datasets/builtin.py](./lib/data/datasets/builtin.py).
     - COCO's format annotations for HICO-DET and VCOCO dataset.
@@ -26,7 +26,7 @@ To update.
 
 ### Demo Inference with Pre-trained Model
 
-1. Download our pre-trained model on [HICO-DET dataset]() or V-COCO dataset. *Note: HICO-DET dataset allows 116 (excluding "no_interaction") actions, while V-COCO allows 25 actions*.
+1. Download our pre-trained model on HICO-DET dataset or V-COCO dataset. *Note: HICO-DET dataset allows 116 (excluding "no_interaction") actions and V-COCO allows 25 actions*.
 
     ```
     cd demo
@@ -119,7 +119,7 @@ python train_net.py --num-gpus 2 \
   --config-file configs/HICO-DET/interaction_R_50_FPN.yaml OUTPUT_DIR ./output/HICO_interaction
 ```
 
-To run inference on `hico-det_test`. This code will trigger the official HICO-DET MATLAB evaluation. Please make sure MATLAB is available in your machine and check the hard-coded path `cfg.TEST.HICO_OFFICIAL_ANNO_FILE` and `cfg.TEST.HICO_OFFICIAL_BBOX_FILE` can access direct to the original HICO-DET annotation files.
+To run inference on `hico-det_test`. This code will trigger the official HICO-DET MATLAB evaluation. **Please make sure MATLAB is available in your machine** and check the hard-coded path `cfg.TEST.HICO_OFFICIAL_ANNO_FILE` and `cfg.TEST.HICO_OFFICIAL_BBOX_FILE` can direct to the original HICO-DET annotation files.
 
 ```
 # To run inference. Using multiple GPUs can reduce the total inference time.
@@ -130,15 +130,17 @@ python train_net.py --eval-only --num-gpus 2 \
 ```
 
 **Expected results**
-- Inference time should around 0.0766s/image (on V100 GPU)
+- Inference time should around 0.0766s/image (on V100 GPU).
 - It will list the results of COCO's metrics on interacting object detection as above.
 - The results of HICO-DET's metrics will be listed, e.g,
     | Expected results |  full   |   rare   |  non-rare |
     | :--- | :---: | :---: | :---: |
-    | Default mAP | 23.013 | 15.630 | 25.525 |
+    | Default mAP | 20.096 | 14.969 | 21.628 |
+    | Default mAP (excluding "no_interaction") | 23.188 | 15.650 | 25.753 |
+  *Note: This result is better than the result reported in our paper due to some code optimization.*
 
 ### 3. Zero-Shot HOI Detection
-The following examples train a model to detect zero-shot human-object interactions using `hico-det_train` set. The only difference from the above is to use class agnostic bbox regressor.
+The following examples train a model to detect zero-shot human-object interactions using `hico-det_train` set. The only difference from the above is to use a class agnostic bbox regressor.
 
 ```
 # Interacting object detection
@@ -156,10 +158,10 @@ To run inference, you can specify the interested novel object categories by `--n
 ```
 
 ## Known/Novel Split - 80 MS-COCO Objects
-To simulate the zero-shot cases, we split the 80 object categories into known and novel set based on their occurrence in HICO-DET and VCOCO datasets. The split can be found at [datasets/known_novel_split.py](./datasets/known_novel_split.py).
+To simulate the zero-shot cases, we split the 80 object categories into a known and novel set based on their occurrence frequency in HICO-DET and VCOCO datasets. The split can be found at [datasets/known_novel_split.py](./datasets/known_novel_split.py).
 
 ## Citing
-If you use this code in your research or wish to refer to the baseline results published, please use the following BibTeX entry.
+If you use this code in your research or wish to refer to the baseline results published, please use the following BibTeX.
 ```
 @InProceedings{Wang_2020_CVPR,
 author = {Wang, Suchen and Yap, Kim-Hui and Yuan, Junsong and Tan, Yap-Peng},
