@@ -111,7 +111,7 @@ def add_hoircnn_default_config(cfg):
     # balance obtaining high recall with not having too many low precision detections
     # that will slow down inference post processing steps (like NMS)
     # A default threshold of 0.0 increases AP by ~0.2-0.3 but significantly slows down inference.
-    cfg.MODEL.ROI_HEADS.HOI_SCORE_THRESH_TEST = 0.05
+    cfg.MODEL.ROI_HEADS.HOI_SCORE_THRESH_TEST = 0.001
 
     # ------------------------------------------------------------------------ #
     # HOI HEADS options
@@ -132,6 +132,42 @@ def add_hoircnn_default_config(cfg):
     # These are empirically chosen to approximately lead to balanced
     # positive v.s. negative samples. 
     cfg.MODEL.HOI_BOX_HEAD.ACTION_CLS_WEIGHTS = [1., 10.]
+
+    # In some datasets, there are person to person interactions.
+    # This option allows the model to handle this case.
+    cfg.MODEL.HOI_BOX_HEAD.ALLOW_PERSON_TO_PERSON = False
+
+    # ---------------------------------------------------------------------------- #
+    # ZERO-SHOT INFERENCE options
+    # ---------------------------------------------------------------------------- #
+    cfg.ZERO_SHOT = CN()
+    # Enable the zero-shot inference.
+    cfg.ZERO_SHOT.ZERO_SHOT_ON = False
+    
+    # Interested novel classes to detect.
+    cfg.ZERO_SHOT.NOVEL_CLASSES = [""]
+    
+    # Threshold (assuming scores in a [0, 1] range) to activate zero-shot inference.
+    # Only boxes whose score of known classes < PRE_INFERENCE_THRESH will be passed
+    # to infer the score of novel classes.
+    cfg.ZERO_SHOT.PRE_INFERENCE_THRESH = 0.3
+    
+    # Minimum score threshold (assuming scores in a [0, 1] range) to keep
+    # a box prediction of novel classes
+    cfg.ZERO_SHOT.POST_INFERENCE_THRESH = 0.25
+
+    # The number of known classes used to infer the score of novel classes.
+    cfg.ZERO_SHOT.TOPK_KNOWN_CLASSES = 4
+
+    # Word corpus including semantic embeddings. Note: only *Glove* is supported to date.
+    cfg.ZERO_SHOT.SEMANTIC_CORPUS = "./datasets/Glove/glove.6B.300d.txt"
+    
+    # Files to load/save pre-computed semantic embeddings. It contains a
+    # dict[novel class name (str): semantic embedding (np.array)]
+    cfg.ZERO_SHOT.PRECOMPUTED_SEMANTIC_EMBEDDINGS = ""
+    
+    # A value chosen to keep the maximum number of box detections for novel objects
+    cfg.ZERO_SHOT.DETECTIONS_PER_IMAGE = 3
 
     # ---------------------------------------------------------------------------- #
     # Additional TEST options

@@ -22,17 +22,16 @@ import torch
 from torch.nn.parallel import DistributedDataParallel
 
 import detectron2.utils.comm as comm
-from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog
 from detectron2.engine import DefaultTrainer, default_argument_parser, default_setup, hooks, launch
 from detectron2.evaluation import verify_results
 from detectron2.modeling import GeneralizedRCNNWithTTA
-from detectron2.checkpoint import DetectionCheckpointer
 
 from lib.config import add_hoircnn_default_config
 from lib.data import build_hoi_train_loader, build_hoi_test_loader
 from lib.evaluation import VCOCOEvaluator, HICOEvaluator
+from lib.checkpoint import DetectionCheckpointer
 
 
 class Trainer(DefaultTrainer):
@@ -43,6 +42,17 @@ class Trainer(DefaultTrainer):
     "SimpleTrainer", or write your own training loop. You can use
     "tools/plain_train_net.py" as an example.
     """
+    def __init__(self, cfg):
+        super().__init__(cfg)
+        # Assume no other objects need to be checkpointed.
+        # We can later make it checkpoint the stateful hooks
+        self.checkpointer = DetectionCheckpointer(
+            # Assume you want to save checkpoints together with logs/statistics
+            self.model,
+            cfg.OUTPUT_DIR,
+            optimizer=self.optimizer,
+            scheduler=self.scheduler,
+        )
 
     @classmethod
     def build_evaluator(cls, cfg, dataset_name, output_folder=None):

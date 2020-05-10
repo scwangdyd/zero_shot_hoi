@@ -7,10 +7,12 @@ from detectron2.layers import Linear, ShapeSpec, batched_nms, cat
 from detectron2.modeling.roi_heads import FastRCNNOutputLayers
 from detectron2.modeling.roi_heads.fast_rcnn import fast_rcnn_inference
 from detectron2.modeling.roi_heads.fast_rcnn import FastRCNNOutputs
+from detectron2.modeling.box_regression import Box2BoxTransform
 from detectron2.utils.events import get_event_storage
 from detectron2.data.catalog import MetadataCatalog
 from detectron2.structures import Boxes, Instances
 
+from .zero_shot import load_semantic_embeddings, ZeroShotPredictor
 
 def interaction_inference_single_image(
     image_shape,
@@ -269,15 +271,97 @@ class HoiOutputs(object):
         return instances
 
 
-class BoxOutputLayers(FastRCNNOutputLayers):
+class BoxOutputLayers(nn.Module):
     """
     Two linear layers for predicting Fast R-CNN outputs:
       (1) proposal-to-detection box regression deltas
       (2) classification scores
     """
+    def __init__(self, cfg, input_shape):
+        """
+        Args:
+            cfg
+            input_shape (ShapeSpec): shape of the input feature to this module
+            box2box_transform (Box2BoxTransform or Box2BoxTransformRotated):
+            num_classes (int): number of foreground classes
+            cls_agnostic_bbox_reg (bool): whether to use class agnostic for bbox regression
+            smooth_l1_beta (float): transition point from L1 to L2 loss.
+            test_score_thresh (float): threshold to filter predictions results.
+            test_nms_thresh (float): NMS threshold for prediction results.
+            test_topk_per_image (int): number of top predictions to produce per image.
+        """
+        super(BoxOutputLayers, self).__init__()
+        # fmt: off
+        self.box2box_transform = Box2BoxTransform(weights=cfg.MODEL.ROI_BOX_HEAD.BBOX_REG_WEIGHTS)
+        self.num_classes           = cfg.MODEL.ROI_HEADS.NUM_CLASSES
+        self.cls_agnostic_bbox_reg = cfg.MODEL.ROI_BOX_HEAD.CLS_AGNOSTIC_BBOX_REG
+        self.smooth_l1_beta        = cfg.MODEL.ROI_BOX_HEAD.SMOOTH_L1_BETA
+        self.test_score_thresh     = cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST
+        self.test_nms_thresh       = cfg.MODEL.ROI_HEADS.NMS_THRESH_TEST
+        self.test_topk_per_image   = cfg.TEST.DETECTIONS_PER_IMAGE
+        self.zero_shot_on          = cfg.ZERO_SHOT.ZERO_SHOT_ON
+        # fmt: on
+        
+        if isinstance(input_shape, int):  # some backward compatbility
+            input_shape = ShapeSpec(channels=input_shape)
+        input_size = input_shape.channels * (input_shape.width or 1) * (input_shape.height or 1)
+        # The prediction layer for num_classes foreground classes and one background class
+        # (hence + 1)
+        self.cls_score = Linear(input_size, self.num_classes + 1)
+        num_bbox_reg_classes = 1 if self.cls_agnostic_bbox_reg else self.num_classes
+        box_dim = len(self.box2box_transform.weights)
+        self.bbox_pred = Linear(input_size, num_bbox_reg_classes * box_dim)
+
+        nn.init.normal_(self.cls_score.weight, std=0.01)
+        nn.init.normal_(self.bbox_pred.weight, std=0.001)
+        for l in [self.cls_score, self.bbox_pred]:
+            nn.init.constant_(l.bias, 0)
+
+        if self.zero_shot_on:
+            self._init_zero_shot(cfg)
+
+    def _init_zero_shot(self, cfg):
+        """
+        Initilize module for zero-shot inference.
+        Prepare the semantic embeddings for novel classes.
+        Args:
+            cfg: configs.
+        """
+        # Known classes and novel classes.
+        known_classes_from_dataset = []
+        if len(cfg.DATASETS.TRAIN):
+            metadata = MetadataCatalog.get(cfg.DATASETS.TRAIN[0])
+            known_classes_from_dataset = metadata.get("known_classes", [])
+            
+        novel_classes_from_args = cfg.ZERO_SHOT.NOVEL_CLASSES
+        novel_classes_from_dataset = []
+        if len(cfg.DATASETS.TEST):
+            metadata = MetadataCatalog.get(cfg.DATASETS.TEST[0])
+            novel_classes_from_dataset = metadata.get("novel_classes", [])
+                
+        known_classes = known_classes_from_dataset
+        novel_classes = novel_classes_from_args + novel_classes_from_dataset
+
+        self.zero_shot_predictor = ZeroShotPredictor(cfg, known_classes, novel_classes)
+
+    def forward(self, x):
+        """
+        Returns:
+            Tensor: Nx(K+1) scores for each box
+            Tensor: Nx4 or Nx(Kx4) bounding box regression deltas.
+        """
+        if x.dim() > 2:
+            x = torch.flatten(x, start_dim=1)
+        scores = self.cls_score(x)
+        proposal_deltas = self.bbox_pred(x)
+        return scores, proposal_deltas
 
     def inference(self, predictions, proposals):
         scores, proposal_deltas = predictions
+        if self.zero_shot_on:
+            scores, proposal_deltas = self.zero_shot_predictor.inference(
+                scores, proposal_deltas, proposals
+            )
         return BoxOutputs(
             self.box2box_transform, scores, proposal_deltas, proposals, self.smooth_l1_beta
         ).box_inference(self.test_score_thresh, self.test_nms_thresh, self.test_topk_per_image)
@@ -293,6 +377,18 @@ class BoxOutputLayers(FastRCNNOutputLayers):
         return BoxOutputs(
             self.box2box_transform, scores, proposal_deltas, proposals, self.smooth_l1_beta
         ).losses()
+
+    def predict_boxes_for_gt_classes(self, predictions, proposals):
+        scores, proposal_deltas = predictions
+        return FastRCNNOutputs(
+            self.box2box_transform, scores, proposal_deltas, proposals, self.smooth_l1_beta
+        ).predict_boxes_for_gt_classes()
+
+    def predict_boxes(self, predictions, proposals):
+        scores, proposal_deltas = predictions
+        return FastRCNNOutputs(
+            self.box2box_transform, scores, proposal_deltas, proposals, self.smooth_l1_beta
+        ).predict_boxes()
 
 
 class HoiOutputLayers(nn.Module):
