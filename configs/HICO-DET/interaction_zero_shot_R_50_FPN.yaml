@@ -2,9 +2,12 @@ _BASE_: "../Base-HOIRCNN-FPN.yaml"
 MODEL:
   WEIGHTS: "./output/model_final_280758.pkl"
   HOI_ON: True
-  HOI_BOX_HEAD:
-    ACTION_CLS_WEIGHTS: [10., 128.]
-    ALLOW_PERSON_TO_PERSON: True
+  ROI_BOX_HEAD:
+    CLS_AGNOSTIC_BBOX_REG: True
+ZERO_SHOT:
+  ZERO_SHOT_ON: True
+  PRECOMPUTED_SEMANTIC_EMBEDDINGS: "./datasets/precomputed_semantic_embeddings.pkl"
+  NOVEL_CLASSES: []
 SOLVER:
   IMS_PER_BATCH: 4
   BASE_LR: 0.005

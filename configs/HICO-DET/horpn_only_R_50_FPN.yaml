@@ -1,16 +1,15 @@
 _BASE_: "../Base-HOIRCNN-FPN.yaml"
 MODEL:
   WEIGHTS: "./output/model_final_280758.pkl"
-  HOI_ON: True
-  HOI_BOX_HEAD:
-    ACTION_CLS_WEIGHTS: [10., 128.]
-    ALLOW_PERSON_TO_PERSON: True
+  META_ARCHITECTURE: "HOIProposalNetwork"
+  #HORPN:
+  #  NMS_THRESH: 0.5
 SOLVER:
   IMS_PER_BATCH: 4
   BASE_LR: 0.005
-  STEPS: (40000, 80000)
-  MAX_ITER: 100000
   CHECKPOINT_PERIOD: 1000
+  STEPS: (40000, 50000)
+  MAX_ITER: 60000
 DATASETS:
   TRAIN: ("hico-det_train", )
   TEST: ("hico-det_test", )

@@ -2,12 +2,14 @@ _BASE_: "../Base-HOIRCNN-FPN.yaml"
 MODEL:
   WEIGHTS: "./output/model_final_280758.pkl"
   META_ARCHITECTURE: "HOIProposalNetwork"
+  HORPN:
+    NMS_THRESH: 0.5
 SOLVER:
-  IMS_PER_BATCH: 4
-  BASE_LR: 0.005
+  IMS_PER_BATCH: 8
+  BASE_LR: 0.01
   CHECKPOINT_PERIOD: 1000
-  STEPS: (4000, 5000)
-  MAX_ITER: 6000
+  STEPS: (20000, 30000)
+  MAX_ITER: 40000
 DATASETS:
-  TRAIN: ("vcoco_train", "vcoco_val")
-  TEST: ("vcoco_test", )
+  TRAIN: ("vcoco_train_known", )
+  TEST: ("vcoco_val", )
