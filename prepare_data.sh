@@ -15,3 +15,11 @@ gdown "https://drive.google.com/uc?id=1x0Eso9J5v_5Wb1Aa9xnFWyinowaHJn1b" -O data
 mkdir output
 echo "Downloading pre-trained Faster R-CNN with ResNet50-FPN"
 wget "https://dl.fbaipublicfiles.com/detectron2/COCO-Detection/faster_rcnn_R_50_FPN_3x/137849458/model_final_280758.pkl" -O ./output/model_final_280758.pkl
+
+# Download Glove vector representations for words. Refer to https://nlp.stanford.edu/projects/glove/.
+echo "Downloading Glove work embeddings ..."
+mkdir datasets/Glove
+wget "http://nlp.stanford.edu/data/glove.6B.zip" -O datasets/Glove/glove.6B.zip
+cd datasets/Glove
+unzip "glove.6B.zip"
+cd ../..
