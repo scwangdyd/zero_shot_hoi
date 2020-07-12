@@ -48,33 +48,33 @@ _PREDEFINED_SPLITS_VCOCO = {}
 _PREDEFINED_SPLITS_VCOCO["vcoco"] = {
     "vcoco_train": (
         "coco/images/train2014",
-        "coco/annotations/instances_vcocotrain_hoi_github.json"
+        "vcoco/annotations/instances_vcocotrain.json"
     ),
     "vcoco_val": (
         "coco/images/train2014",
-        "coco/annotations/instances_vcocoval_hoi_github.json"
+        "vcoco/annotations/instances_vcocoval.json"
     ),
     "vcoco_test": (
         "coco/images/val2014",
-        "coco/annotations/instances_vcocotest_hoi_github.json"
+        "vcoco/annotations/instances_vcocotest.json"
     ),
     "vcoco_val_only_interaction": (
         "coco/images/train2014",
-        "coco/annotations/instances_vcocoval_hoi_only_active_github.json"
+        "vcoco/annotations/instances_vcocoval_only_active.json"
     ),
     "vcoco_test_only_interaction": (
         "coco/images/val2014",
-        "coco/annotations/instances_vcocotest_hoi_only_active_github.json"
+        "vcoco/annotations/instances_vcocotest_only_active.json"
     ),
 }
 _PREDEFINED_SPLITS_VCOCO["vcoco_known"] = {
     "vcoco_train_known": (
         "coco/images/train2014",
-        "coco/annotations/instances_vcocotrain_hoi_known_github.json"
+        "vcoco/annotations/instances_vcocotrain_known.json"
     ),
     "vcoco_val_known": (
         "coco/images/train2014",
-        "coco/annotations/instances_vcocoval_hoi_known_github.json"
+        "vcoco/annotations/instances_vcocoval_known.json"
     ),
 }
 
@@ -83,15 +83,15 @@ _PREDEFINED_SPLITS_HICO = {}
 _PREDEFINED_SPLITS_HICO["hico-det"] = {
     "hico-det_train": (
         "hico_20160224_det/images/train2015",
-        "hico_20160224_det/annotations/instances_hico_train_hoi_github_may1.json",
+        "hico_20160224_det/annotations/instances_hico_train.json",
     ),
     "hico-det_test": (
         "hico_20160224_det/images/test2015",
-        "hico_20160224_det/annotations/instances_hico_test_hoi_github_may1.json",
+        "hico_20160224_det/annotations/instances_hico_test.json",
     ),
     "hico-det_train_seen": (
         "hico_20160224_det/images/train2015",
-        "hico_20160224_det/annotations/instances_hico_train_hoi_seen_github.json"
+        "hico_20160224_det/annotations/instances_hico_train_seen.json"
     ),
 }
 
@@ -181,7 +181,7 @@ def register_all_vcoco(root):
 
 
 # Register them all under _root (path to datasets)
-_root = os.getenv("DETECTRON2_DATASETS", "/raid1/suchen/dataset/")
+_root = os.getenv("DETECTRON2_DATASETS", "./datasets")
 register_all_hico(_root)
 register_all_vcoco(_root)
 #register_all_coco(_root)
