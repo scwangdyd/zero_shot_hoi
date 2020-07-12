@@ -58,7 +58,7 @@ def get_parser():
     parser.add_argument(
         "--confidence-threshold",
         type=float,
-        default=0.8,
+        default=0.6,
         help="Minimum score for instance predictions to be shown",
     )
     parser.add_argument(

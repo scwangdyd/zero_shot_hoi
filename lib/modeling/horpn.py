@@ -7,11 +7,11 @@ import fvcore.nn.weight_init as weight_init
 from detectron2.layers import ShapeSpec
 from detectron2.utils.registry import Registry
 
-from detectron2.modeling.anchor_generator import build_anchor_generator
 from detectron2.modeling.box_regression import Box2BoxTransform
 from detectron2.modeling.matcher import Matcher
 from detectron2.modeling.proposal_generator.build import PROPOSAL_GENERATOR_REGISTRY
 
+from .anchor_generator import build_anchor_generator
 from .horpn_outputs import HORPNOutputs, find_top_horpn_proposals
 
 

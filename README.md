@@ -51,7 +51,7 @@ To update.
     python demo.py --config-file ./configs/HICO-DET/interaction_zero_shot_R_50_FPN.yaml \
       --novel-object microphone paddle \
       --input ./demo/HICO_test2015_00003124.jpg \
-      --opts MODEL.WEIGHTS ./output/hico_det_pretrained.pkl
+      --opts MODEL.WEIGHTS ./output/hico_det_pretrained_agnostic.pkl
     ```
 
 ## Training a model and running inference
@@ -62,8 +62,8 @@ This example is provided for training the human-object region proposals network 
 ```
 # To train HORPN
 python train_net.py --num-gpus 2 \
-  --config-file configs/horpn_only.yaml \
-  OUTPUT_DIR ./output/horpn_only
+  --config-file configs/VCOCO/horpn_only_R_50_FPN.yaml \
+  OUTPUT_DIR ./output/vcoco_horpn_only
 ```
 
 To run inference on `vcoco_val` which includes both known and novel objects.
@@ -71,9 +71,9 @@ To run inference on `vcoco_val` which includes both known and novel objects.
 ```
 # To run inference to evaluate HORPN. Using multiple GPUs can reduce the total inference time.
 python train_net.py --eval-only --num-gpus 2 \
-  --config-file configs/horpn_only.yaml \
-  MODEL.WEIGHTS ./output/horpn_only/model_final.pth \
-  OUTPUT_DIR ./output/horpn_only
+  --config-file configs/VCOCO/horpn_only_R_50_FPN.yaml \
+  MODEL.WEIGHTS ./output/vcoco_horpn_only/model_final.pth \
+  OUTPUT_DIR ./output/vcoco_horpn_only
 ```
 
 **Expected results**

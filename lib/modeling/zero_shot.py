@@ -94,7 +94,6 @@ class ZeroShotPredictor(nn.Module):
         self.precomputed_semantic_embs = cfg.ZERO_SHOT.PRECOMPUTED_SEMANTIC_EMBEDDINGS
         self.semantic_corpus           = cfg.ZERO_SHOT.SEMANTIC_CORPUS
         # fmt: on
-        
         self._init_embs(known_classes, novel_classes)
         
     def _init_embs(self, known_classes, novel_classes):
@@ -115,6 +114,9 @@ class ZeroShotPredictor(nn.Module):
         self.known_class_embs = torch.stack([
             torch.as_tensor(class_embs_dict[x]) for x in known_classes
         ], dim=0)
+
+        if len(self.novel_classes) == 0:
+            return
         self.novel_class_embs = torch.stack([
             torch.as_tensor(class_embs_dict[x]) for x in novel_classes if x in class_embs_dict
         ], dim=0)
