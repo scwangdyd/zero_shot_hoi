@@ -4,13 +4,23 @@
 # Download HICO-DET dataset. Comment out the following lines if you already have it.
 echo "Downlaoding HICO-DET dataset ..."
 gdown "https://drive.google.com/uc?id=1QZcJmGVlF9f4h-XLWe9Gkmnmj2z1gSnk" -O hico_det.tar.gz
-tar -xvf hico_det.tar.gz --directory hico_det
+tar -xvf hico_det.tar.gz
 
 # Download our HICO-DET annotations in COCO's format
 echo "Downlaoding our COCO's format HICO-DET annotations ..."
-mkdir hico_det/annotations
-gdown "https://drive.google.com/uc?id=1lj-2C8WRHX3SJcRStPZJorJwTVpuWCBa" -O hico_det/annotations/instances_hico_train.json
-gdown "https://drive.google.com/uc?id=1x0Eso9J5v_5Wb1Aa9xnFWyinowaHJn1b" -O hico_det/annotations/instances_hico_test.json
+mkdir hico_20160224_det/annotations
+gdown "https://drive.google.com/uc?id=1lj-2C8WRHX3SJcRStPZJorJwTVpuWCBa" -O hico_20160224_det/annotations/instances_hico_train.json
+gdown "https://drive.google.com/uc?id=1x0Eso9J5v_5Wb1Aa9xnFWyinowaHJn1b" -O hico_20160224_det/annotations/instances_hico_test.json
+gdown "https://drive.google.com/uc?id=11e5mymZWOIc-2tf2xSoE4AqDf21qaUul" -O hico_20160224_det/annotations/instances_hico_train_seen.json
+
+# Download VCOCO annotations
+mkdir vcoco
+mkdir vcoco/annotations
+gdown "https://drive.google.com/uc?id=1IS0iIQwMJqD0IlVtpTtuKzN-ztqVjGX3" -O vcoco/annotations/instances_vcoco_train_known.json
+gdown "https://drive.google.com/uc?id=1GsNSyr05jsKRKj_EOQBQHrqgYH26R4Ab" -O vcoco/annotations/instances_vcoco_train.json
+gdown "https://drive.google.com/uc?id=1WuQ0eimCl47sHKxxEONjZJ1PuSjrKLvg" -O vcoco/annotations/instances_vcoco_val_known.json
+gdown "https://drive.google.com/uc?id=1tWwHw__py8BMQJhFnpyWXRdm-XoSWhWk" -O vcoco/annotations/instances_vcoco_val.json
+gdown "https://drive.google.com/uc?id=138NPkxyddKrgqcBAB0NBqMjXQExZxIcq" -O vcoco/annotations/instances_vcoco_test.json
 
 # Download Detectron2 Faster R-CNN with ResNet50-FPN
 mkdir ../output
