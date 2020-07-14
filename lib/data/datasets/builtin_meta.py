@@ -100,11 +100,20 @@ def _get_vcoco_known_instances_meta():
     # Mapping from the incontiguous known category id to an id in [0, 42]
     known_dataset_id_to_contiguous_id = {k: i for i, k in enumerate(known_ids)}
     known_classes = [k["name"] for k in HICO_OBJECTS if k["isknown"] == 1]
+    novel_classes = []
+    # Category id of `person`
+    person_cls_id = [k["id"] for k in VCOCO_OBJECTS if k["name"] == 'person'][0]
+    # VCOCO actions
+    action_classes = [k["name"] for k in VCOCO_ACTIONS]
 
     ret = {
         "thing_dataset_id_to_contiguous_id": known_dataset_id_to_contiguous_id,
-        "thing_classes": known_classes,
-        "thing_colors": thing_colors,
+        "thing_classes":  known_classes,
+        "thing_colors":   thing_colors,
+        "known_classes":  known_classes,
+        "novel_classes":  novel_classes,
+        "person_cls_id":  person_cls_id,
+        "action_classes": action_classes,
     }
     return ret
 

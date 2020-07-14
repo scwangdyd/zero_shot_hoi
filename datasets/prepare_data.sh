@@ -16,11 +16,11 @@ gdown "https://drive.google.com/uc?id=11e5mymZWOIc-2tf2xSoE4AqDf21qaUul" -O hico
 # Download VCOCO annotations
 mkdir vcoco
 mkdir vcoco/annotations
-gdown "https://drive.google.com/uc?id=1IS0iIQwMJqD0IlVtpTtuKzN-ztqVjGX3" -O vcoco/annotations/instances_vcoco_train_known.json
-gdown "https://drive.google.com/uc?id=1GsNSyr05jsKRKj_EOQBQHrqgYH26R4Ab" -O vcoco/annotations/instances_vcoco_train.json
-gdown "https://drive.google.com/uc?id=1WuQ0eimCl47sHKxxEONjZJ1PuSjrKLvg" -O vcoco/annotations/instances_vcoco_val_known.json
-gdown "https://drive.google.com/uc?id=1tWwHw__py8BMQJhFnpyWXRdm-XoSWhWk" -O vcoco/annotations/instances_vcoco_val.json
-gdown "https://drive.google.com/uc?id=138NPkxyddKrgqcBAB0NBqMjXQExZxIcq" -O vcoco/annotations/instances_vcoco_test.json
+gdown "https://drive.google.com/uc?id=1IS0iIQwMJqD0IlVtpTtuKzN-ztqVjGX3" -O vcoco/annotations/instances_vcocotrain_known.json
+gdown "https://drive.google.com/uc?id=1GsNSyr05jsKRKj_EOQBQHrqgYH26R4Ab" -O vcoco/annotations/instances_vcocotrain.json
+gdown "https://drive.google.com/uc?id=1WuQ0eimCl47sHKxxEONjZJ1PuSjrKLvg" -O vcoco/annotations/instances_vcocoval_known.json
+gdown "https://drive.google.com/uc?id=1tWwHw__py8BMQJhFnpyWXRdm-XoSWhWk" -O vcoco/annotations/instances_vcocoval.json
+gdown "https://drive.google.com/uc?id=138NPkxyddKrgqcBAB0NBqMjXQExZxIcq" -O vcoco/annotations/instances_vcocotest.json
 
 # Download Detectron2 Faster R-CNN with ResNet50-FPN
 mkdir ../output
